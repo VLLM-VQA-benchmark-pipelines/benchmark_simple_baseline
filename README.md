@@ -2,6 +2,26 @@
 
 Пишем первый простой бенчмарк для модели на локальных данных.
 
+# Данные для бенчмарка
+
+Заготовка для бенчмарка запускается на датасетах:
+```
+data
+├── MIDV-2020_MINI
+│   ├── annotation.csv
+│   └── images
+│
+├── MTVQA_TEST_RU_MINI_0_9
+│   ├── annotation.tsv
+│   └── images
+│
+└── MTVQA_TEST_RU_MINI_10_19
+    ├── annotation.tsv
+    └── images
+```
+
+Скачать их можно по ссылкам приведенным в описании ([ссылка](https://github.com/VLLM-VQA-benchmark-pipelines/wiki/blob/main/projects/tasks/5.%20Готово/Подготовка%20тестовых%20мини%20датасетов.md)).
+
 # Docker контейнер
 
 ## Build Docker image
