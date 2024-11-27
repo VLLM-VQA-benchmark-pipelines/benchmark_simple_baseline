@@ -1,5 +1,6 @@
 import os
-import pandas as pd
+
+from dataset_utils import DatasetIterator
 from model_utils import Qwen2VL_model
 from metrics_utils import calculate_metrics
 
@@ -23,17 +24,10 @@ if __name__ == "__main__":
 
     # создаем модель
     model = Qwen2VL_model(cache_directory)
-
-    # Здесь пишем "Итератор по датасету"
-    # считываем датасет
-    annot_path = os.path.join(dataset_dir_path, "annotation.csv")
-    df = pd.read_csv(annot_path, sep=";")
-
-    # пока берем 1 картинку и 1 вопрос
-    row_index = 0
-    row = df.loc[row_index]
-    image_path, question, answear = row[['image_path', 'question', 'answer']]
-    image_path = os.path.join(dataset_dir_path, image_path)
+    # создаем итератор
+    iterator = DatasetIterator(dataset_dir_path)
+    # пока берем 1 картинку и 1 вопрос - далее можем брать батч или пройтись форчиком 
+    image_path, question, answear = next(iterator)
 
     # отдаем модели 1 картинку и 1 вопрос, получаем ответ
     model_answer = model.predict(image=image_path, question=question)
