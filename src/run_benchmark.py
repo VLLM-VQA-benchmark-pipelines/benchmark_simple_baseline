@@ -20,16 +20,11 @@ if __name__ == "__main__":
     script_dir = os.path.dirname(os.path.abspath(__file__))
     cache_directory = os.path.join(script_dir, cache_directory)
 
-    # Здесь пишем Интерпретатор конфига
-    # Получаем список датасетов (их всего 2)
-    # Список моделей (только Qwen2-VL модели)
-    # Организуем циклы
-
     # Блок кода для одного бенчмарка 1 модели на 1 датасете
-    model_name = "Qwen2-VL-2B-Instruct"
+    model_name = "Qwen2-VL-2B-Instruct-AWQ" # "Qwen2-VL-2B-Instruct"
     dataset_name = "MIDV-2020_MINI"
 
-    # Получаем ответы модели на нашем датасете
+    # Получаем ответы "1 модели  на 1 датасете"
     get_model_answers_on_VQA_dataset(
         model_name,
         dataset_name,
@@ -39,7 +34,7 @@ if __name__ == "__main__":
         iter_log=True,
     )
 
-    # Оцениваем метрики
+    # Оцениваем метрики "1 модели  на 1 датасете"
     evaluate_model_metrics_by_answers(
         model_name, dataset_name, datasets_dir_path, answers_dir_path, metrics_dir_path
     )
