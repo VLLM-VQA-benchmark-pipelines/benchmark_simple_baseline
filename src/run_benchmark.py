@@ -1,14 +1,19 @@
 import os
 
-from dataset_utils import DatasetIterator
-from model_utils import Qwen2VL_model
-from metrics_utils import calculate_metrics
+from benchmark_utils import get_model_answers_on_VQA_dataset
+from benchmark_utils import evaluate_model_metrics_by_answers
 
 
 if __name__ == "__main__":
     # Укажите путь к директории, где хотите хранить модели
     cache_directory = "model_cache"
-    dataset_dir_path = "data/MIDV-2020_MINI"
+    datasets_dir_path = "data/datasets"
+    answers_dir_path = "data/models_answers"
+    metrics_dir_path = "data/models_metrics"
+
+    # создаем дирректории
+    os.makedirs(answers_dir_path, exist_ok=True)
+    os.makedirs(metrics_dir_path, exist_ok=True)
 
     # Сохраняем модели Qwen2-VL в примонтированую папку
     # иначе замучаемся качать их на каждый запуск контейнера
@@ -21,19 +26,20 @@ if __name__ == "__main__":
     # Организуем циклы
 
     # Блок кода для одного бенчмарка 1 модели на 1 датасете
+    model_name = "Qwen2-VL-2B-Instruct"
+    dataset_name = "MIDV-2020_MINI"
 
-    # создаем модель
-    model = Qwen2VL_model(cache_directory)
-    # создаем итератор
-    iterator = DatasetIterator(dataset_dir_path)
-    # пока берем 1 картинку и 1 вопрос - далее можем брать батч или пройтись форчиком 
-    image_path, question, answear = next(iterator)
+    # Получаем ответы модели на нашем датасете
+    get_model_answers_on_VQA_dataset(
+        model_name,
+        dataset_name,
+        datasets_dir_path,
+        answers_dir_path,
+        cache_directory,
+        iter_log=True,
+    )
 
-    # отдаем модели 1 картинку и 1 вопрос, получаем ответ
-    model_answer = model.predict(image=image_path, question=question)
-
-    print(answear, model_answer)
-    
-    # Здесь реализуем "Оценщик метрик"
-    metrics = calculate_metrics([answear], [model_answer])
-    print(metrics)
+    # Оцениваем метрики
+    evaluate_model_metrics_by_answers(
+        model_name, dataset_name, datasets_dir_path, answers_dir_path, metrics_dir_path
+    )
