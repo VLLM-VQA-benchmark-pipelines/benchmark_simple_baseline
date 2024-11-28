@@ -50,3 +50,32 @@ docker run \
 python run_benchmark.py
 ```
 
+### Пример вывода консоли
+```
+******************************************
+Начинаем бенчмарк
+модели: Qwen2-VL-2B-Instruct
+на наборе данных: MIDV-2020_MINI
+
+`Qwen2VLRotaryEmbedding` can now be fully parameterized by passing the model config through the `config` argument. All other arguments will be removed in v4.46
+Loading checkpoint shards: 100%|█████████████████████████████████████████████████████████████████████████████████████████████| 2/2 [00:00<00:00,  3.15it/s]
+
+Итерируемся по набору данных
+1 | data/datasets/MIDV-2020_MINI/images/00.jpg | Напиши только фамилию! | Карибжанов | Карибжанов |
+2 | data/datasets/MIDV-2020_MINI/images/00.jpg | Напиши только имя! | Леонид | Карипжанов |
+3 | data/datasets/MIDV-2020_MINI/images/00.jpg | Напиши только отчество | Давидович | Отчество: ЛЕОНИД ДАВИДОВИЧ |
+4 | data/datasets/MIDV-2020_MINI/images/00.jpg | Напиши только дату рождения ! | 03.06.1987 | 03.06.1978 |
+5 | data/datasets/MIDV-2020_MINI/images/00.jpg | Напиши только номер удостоверения! | 4 598 647 461 | 45 98 647461 |
+6 | data/datasets/MIDV-2020_MINI/images/01.jpg | Напиши только фамилию! | Александрова | Александрова |
+7 | data/datasets/MIDV-2020_MINI/images/01.jpg | Напиши только имя! | Александра | Александрова |
+8 | data/datasets/MIDV-2020_MINI/images/01.jpg | Напиши только отчество | Александровна | Отчество - АЛЕКСАНДРОВНА |
+9 | data/datasets/MIDV-2020_MINI/images/01.jpg | Напиши только дату рождения ! | 02.03.1987 | Дата рождения: 02.03.1987 |
+10 | data/datasets/MIDV-2020_MINI/images/01.jpg | Напиши только номер удостоверения! | 241456789 | 02 41 456789 |
+
+Ответы от модели сохранены в: data/models_answers/Qwen2-VL-2B-Instruct_MIDV-2020_MINI_answers.csv
+
+Оцениваем метрики по ответам модели
+Метрики по ID сохранены в: data/models_metrics/Qwen2-VL-2B-Instruct_MIDV-2020_MINI_metrics_by_id.csv
+Метрики по типу документов сохранены в: data/models_metrics/Qwen2-VL-2B-Instruct_MIDV-2020_MINI_metrics_by_doc_type.csv
+```
+
