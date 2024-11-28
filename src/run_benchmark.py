@@ -21,7 +21,7 @@ if __name__ == "__main__":
     cache_directory = os.path.join(script_dir, cache_directory)
 
     # Блок кода для одного бенчмарка 1 модели на 1 датасете
-    model_name = "Qwen2-VL-2B-Instruct-AWQ" # "Qwen2-VL-2B-Instruct"
+    model_name = "Qwen2-VL-2B-Instruct" # "Qwen2-VL-2B-Instruct"
     dataset_name = "MIDV-2020_MINI"
 
     # Получаем ответы "1 модели  на 1 датасете"
