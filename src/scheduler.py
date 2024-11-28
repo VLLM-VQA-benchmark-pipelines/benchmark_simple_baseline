@@ -150,14 +150,4 @@ class BenchmarkScheduler():
             for model_name, model_path in zip(self.models.keys(), self.models.values()):
                 log_and_print(f"\nDataset: {dataset_name}\nModel: {model_name}")
                 self.update_params_yaml(dataset_name, model_name)
-                os.system("dvc repro")
-        
-    
-
-if __name__ == "__main__":
-
-    pasre_json = JSONParser()
-    config_file = pasre_json.load_config("config.json", display_json=False)
-    benchmarks = BenchmarkScheduler(config_file, "params.yaml")
-    benchmarks.run_scheduler()
-
+                os.system("dvc repro")        
