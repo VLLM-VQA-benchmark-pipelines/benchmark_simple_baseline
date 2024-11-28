@@ -1,13 +1,14 @@
 import torch
-from transformers import AutoProcessor, Qwen2VLForConditionalGeneration
 from qwen_vl_utils import process_vision_info
+from transformers import AutoProcessor, Qwen2VLForConditionalGeneration
 
 
 class Qwen2VL_model:
-    def __init__(self, cache_directory):
+    def __init__(self, cache_directory, model_name="Qwen2-VL-2B-Instruct"):
         # default: Load the model on the available device(s)
+        model_name = f"Qwen/{model_name}"
         self.model = Qwen2VLForConditionalGeneration.from_pretrained(
-            "Qwen/Qwen2-VL-2B-Instruct",
+            model_name,
             torch_dtype=torch.bfloat16,
             device_map="auto",
             attn_implementation="flash_attention_2",
@@ -16,7 +17,7 @@ class Qwen2VL_model:
 
         # default processor
         self.processor = AutoProcessor.from_pretrained(
-            "Qwen/Qwen2-VL-2B-Instruct", cache_dir=cache_directory
+            model_name, cache_dir=cache_directory
         )
 
     @staticmethod
