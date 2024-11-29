@@ -49,8 +49,12 @@ RUN pip3 install --no-cache-dir transformers==4.46.1 \
 
 RUN pip3 install --no-cache-dir --no-build-isolation flash-attn==2.6.1
 
+# Установим зависимости для поддержки квантованных моделей GPTQ
+RUN pip3 install --no-cache-dir optimum==1.23.3 auto-gptq==0.7.1
+
 # Установка модулей нужных для бенчмарка
-RUN pip3 install --no-cache-dir pandas jiwer sacrebleu
+RUN pip3 install --no-cache-dir pandas==2.2.3 jiwer==3.0.5 sacrebleu==2.4.3
+RUN pip3 install --no-cache-dir jsonschema==4.23.0
 
 # Создаем рабочую директорию
 WORKDIR /workspace
