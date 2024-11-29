@@ -1,0 +1,10 @@
+{
+    "datasets": {
+        "MIDV-2020_MINI": "data/datasets/MIDV-2020_MINI"
+    },
+    "models": {
+        "Qwen2-VL-2B-Instruct": "",
+        "Qwen2-VL-2B-Instruct-GPTQ-Int8": ""
+    },
+    "metrics": ["WER", "CER", "BLEU"]
+}
