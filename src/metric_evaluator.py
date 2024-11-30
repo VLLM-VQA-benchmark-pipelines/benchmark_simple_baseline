@@ -94,43 +94,52 @@ class MetricEvaluator:
         :return: DataFrame с метриками для каждого типа документа.
         """
         # Создаем список из всех уникальных типов документов
-        doc_types = list(df["doc class"].value_counts().index)
+        doc_types = df["doc class"].unique()
 
-        # Создаем хранилища для метрик
-        wer_error_list = []
-        cer_error_list = []
-        bleu_score_list = []
-
-        # Фильтруем и аппендим хранилища
-        # TODO: А мы точно можем просто усреднить метрики по id?
-        # Кажется, что нет
-        for doc_type in doc_types:
-            wer_error_list.append(df[df["doc class"] == doc_type]["wer_error"].mean())
-            cer_error_list.append(df[df["doc class"] == doc_type]["cer_error"].mean())
-            bleu_score_list.append(df[df["doc class"] == doc_type]["bleu_score"].mean())
-
-        # Создаем DataFrame с метриками для каждого типа документа
-        doc_type_metrics = {
-            "doc_class": doc_types,
-            "wer_error": wer_error_list,
-            "cer_error": cer_error_list,
-            "bleu_score": bleu_score_list,
+        # Создаем хранилища для метрик 
+        results = {
+        "doc_class": [],
+        "wer_error": [],
+        "cer_error": [],
+        "bleu_score": []
         }
 
-        return pd.DataFrame(doc_type_metrics)
+        for doc_type in doc_types:
+            # Фильтрация по типу документа
+            subset = df[df["doc class"] == doc_type]
+            
+            # Подсчёт общих ошибок и слов для WER
+            total_wer_errors = subset["wer_errors"].sum()
+            total_words = subset["word_count"].sum()
+            wer_error = total_wer_errors / total_words if total_words > 0 else 0
+            
+            # Подсчёт общих ошибок и символов для CER
+            total_cer_errors = subset["cer_errors"].sum()
+            total_chars = subset["char_count"].sum()
+            cer_error = total_cer_errors / total_chars if total_chars > 0 else 0
 
-    def group_by_doc_question(self, df):
+            # Средний BLEU
+            bleu_score = subset["bleu_score"].mean()
+
+            # Добавление метрик в результаты
+            results["doc_class"].append(doc_type)
+            results["wer_error"].append(wer_error)
+            results["cer_error"].append(cer_error)
+            results["bleu_score"].append(bleu_score)
+
+        return pd.DataFrame(results)
+
+    def group_by_doc_question(self, df): 
         """
-        Группировка по тип документа + тип вопроса.
+        Группировка по типу документа и типу вопроса.
         :param df: pandas.DataFrame - исходный датафрейм
         :return: pandas.DataFrame - сгруппированный датафрейм с метриками
         """
-        grouped = (
-            df.groupby(["doc_class", "question_type"])[
-                "wer_error", "cer_error", "bleu_score"
-            ]
-            .mean()
-            .reset_index()
-        )
+        # Группировка с подсчетом общих ошибок и токенов
+        grouped = df.groupby(['doc_class', 'question_type']).apply(lambda group: pd.Series({
+            'wer_error': group['wer_errors'].sum() / group['word_count'].sum() if group['word_count'].sum() > 0 else 0,
+            'cer_error': group['cer_errors'].sum() / group['char_count'].sum() if group['char_count'].sum() > 0 else 0,
+            'bleu_score': group['bleu_score'].mean()  # BLEU можно усреднить напрямую
+        })).reset_index()
 
         return grouped
