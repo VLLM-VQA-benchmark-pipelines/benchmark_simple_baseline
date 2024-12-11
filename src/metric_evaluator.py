@@ -1,5 +1,3 @@
-import ast
-
 import pandas as pd
 import sacrebleu
 from jiwer import cer, wer
@@ -31,10 +29,6 @@ class MetricEvaluator:
         """
         Проверка совместимости данных.
         """
-        # столбцы всегда будут не совпадать
-        # if self.true_csv.columns.tolist() != self.pred_csv.columns.tolist():
-        #     raise ValueError("Столбцы true_csv и pred_csv не совпадают.")
-
         if len(self.true_csv) != len(self.pred_csv):
             raise ValueError("Количество строк true_csv и pred_csv не совпадает.")
 
@@ -44,10 +38,9 @@ class MetricEvaluator:
         :return: DataFrame с метриками для каждого ID.
         """
         # Создаем датафейм для результатов
-        # Удаляем максимально избыточную информацию. Можно еще удалить "images_names"
-        # такой колонки пока нет =)
-        # result_df = self.true_csv.drop(columns='answear_bbox')
-        result_df = self.true_csv
+        result_df = (
+            self.true_csv
+        )  # Удаляем максимально избыточную информацию. Можно еще удалить "images_names"
 
         # Создаем хранилища для метрик
         wer_error_list = []
@@ -61,7 +54,7 @@ class MetricEvaluator:
 
             # Проверка на кол-во ответов
             # if len(Y_true) != len(y_pred):
-            #     pass  # Что-то надо придумать или не надо...
+            #     pass # Что-то надо придумать или не надо...
 
             # Вычисляем метрику WER
             wer_error = wer(Y_true, y_pred)
@@ -94,56 +87,46 @@ class MetricEvaluator:
         :return: DataFrame с метриками для каждого типа документа.
         """
         # Создаем список из всех уникальных типов документов
-        doc_types = df["doc class"].unique()
+        doc_types = list(df["doc class"].value_counts().index)
 
-        # Создаем хранилища для метрик 
-        results = {
-        "doc_class": [],
-        "wer_error": [],
-        "cer_error": [],
-        "bleu_score": []
+        # Создаем хранилища для метрик
+        wer_error_list = []
+        cer_error_list = []
+        bleu_score_list = []
+
+        # Фильтруем и аппендим хранилища
+        # TODO: разобраться с названием поля doc class
+        for doc_type in doc_types:
+            wer_error_list.append(df[df["doc class"] == doc_type]["wer_error"].mean())
+            cer_error_list.append(df[df["doc class"] == doc_type]["cer_error"].mean())
+            bleu_score_list.append(df[df["doc class"] == doc_type]["bleu_score"].mean())
+
+        # Создаем DataFrame с метриками для каждого типа документа
+        doc_type_metrics = {
+            "doc_class": doc_types,
+            "wer_error": wer_error_list,
+            "cer_error": cer_error_list,
+            "bleu_score": bleu_score_list,
         }
 
-        for doc_type in doc_types:
-            # Фильтрация по типу документа
-            subset = df[df["doc class"] == doc_type]
-            
-            # Подсчёт общих ошибок и слов для WER
-            total_wer_errors = subset["wer_errors"].sum()
-            total_words = subset["word_count"].sum()
-            wer_error = total_wer_errors / total_words if total_words > 0 else 0
-            
-            # Подсчёт общих ошибок и символов для CER
-            total_cer_errors = subset["cer_errors"].sum()
-            total_chars = subset["char_count"].sum()
-            cer_error = total_cer_errors / total_chars if total_chars > 0 else 0
+        return pd.DataFrame(doc_type_metrics)
 
-            # Средний BLEU
-            bleu_score = subset["bleu_score"].mean()
-
-            # Добавление метрик в результаты
-            results["doc_class"].append(doc_type)
-            results["wer_error"].append(wer_error)
-            results["cer_error"].append(cer_error)
-            results["bleu_score"].append(bleu_score)
-
-        return pd.DataFrame(results)
-
-    def group_by_doc_question(self, df): 
+    def group_by_doc_question(self, df):
         """
-        Группировка по типу документа и типу вопроса.
+        Группировка по тип документа + тип вопроса.
         :param df: pandas.DataFrame - исходный датафрейм
         :return: pandas.DataFrame - сгруппированный датафрейм с метриками
         """
-        # Группировка с подсчетом общих ошибок и токенов
-        grouped = df.groupby(['doc_class', 'question_type']).apply(lambda group: pd.Series({
-            'wer_error': group['wer_errors'].sum() / group['word_count'].sum() if group['word_count'].sum() > 0 else 0,
-            'cer_error': group['cer_errors'].sum() / group['char_count'].sum() if group['char_count'].sum() > 0 else 0,
-            'bleu_score': group['bleu_score'].mean()  # BLEU можно усреднить напрямую
-        })).reset_index()
+        grouped = (
+            df.groupby(["doc_class", "question_type"])[
+                "wer_error", "cer_error", "bleu_score"
+            ]
+            .mean()
+            .reset_index()
+        )
 
         return grouped
-    
+
     def calculate_metrics_general(self):
         """
         Расчет метрик по общему корпусу данных.
@@ -151,17 +134,17 @@ class MetricEvaluator:
         """
         true_answers = []
         pred_answers = []
-        
+
         for row in range(len(self.true_csv)):
-            true_answers.extend(ast.literal_eval(self.true_csv['answers'][row]))
-            pred_answers.extend(ast.literal_eval(self.pred_csv['answers'][row]))
-        
+            true_answers.extend(self.true_csv["answers"][row])
+            pred_answers.extend(self.pred_csv["answers"][row])
+
         wer_error = wer(true_answers, pred_answers)
         cer_error = cer(true_answers, pred_answers)
         bleu_score = sacrebleu.corpus_bleu(true_answers, [pred_answers]).score
 
         return {
-            'wer_error': wer_error,
-            'cer_error': cer_error,
-            'bleu_score': bleu_score
+            "wer_error": wer_error,
+            "cer_error": cer_error,
+            "bleu_score": bleu_score,
         }
